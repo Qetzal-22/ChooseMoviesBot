@@ -62,6 +62,10 @@ async def cmd_start(message: types.Message):
     kb = InlineKeyboardMarkup(inline_keyboard=btns)
     await message.answer("Зарегистрируйся чтоб начать подбор фильмов!", reply_markup=kb)
 
+@dp.message(Command("help"))
+async def cmd_help(message: types.Message):
+    await message.answer("All commands:\n")
+
 @dp.callback_query(F.data.startswith("register_user"))
 async def cmd_register(callback: types.CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id
