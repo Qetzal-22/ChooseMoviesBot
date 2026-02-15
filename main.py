@@ -8,15 +8,19 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 
+from dotenv import load_dotenv
+import os
+
 import asyncio
 import DataBaseUsers
 import DataBaseStorySearch
 import Requests_AI
 
+load_dotenv()
 
-TOKEN_API = ""
+TOKEN_BOT = os.getenv("TOKEN_API")
 
-bot = Bot(TOKEN_API)
+bot = Bot(TOKEN_BOT)
 dp = Dispatcher(storage=MemoryStorage())
 GENRES = [
     "Боевик", "Комедия", "Драма", "Ужаcсы",
