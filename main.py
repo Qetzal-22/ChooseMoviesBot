@@ -62,6 +62,7 @@ async def cmd_start(message: types.Message):
     kb = InlineKeyboardMarkup(inline_keyboard=btns)
     await message.answer("Зарегистрируйся чтоб начать подбор фильмов!", reply_markup=kb)
 
+# developing command
 @dp.message(Command("help"))
 async def cmd_help(message: types.Message):
     await message.answer("All commands:\n1) /start - Start Bot\n2) /help - View Command Bot\n")
