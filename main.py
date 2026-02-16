@@ -64,7 +64,7 @@ async def cmd_start(message: types.Message):
 
 @dp.message(Command("help"))
 async def cmd_help(message: types.Message):
-    await message.answer("All commands:\n1) /start - Start Bot\n2) /help - View Command Bot\n")
+    await message.answer("All commands:\n1) /start - Start Bot\n2) /help - View Command Bot\nText command:\n")
 
 @dp.callback_query(F.data.startswith("register_user"))
 async def cmd_register(callback: types.CallbackQuery, state: FSMContext):
