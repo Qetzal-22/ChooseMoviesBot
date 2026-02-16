@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from openai import OpenAI
 import asyncio
-
+from dotenv import load_dotenv
+import os
 
 
 class AI:
@@ -10,10 +11,12 @@ class AI:
         self.model = "tngtech/deepseek-r1t2-chimera:free"
 
     async def get_client(self) -> type(OpenAI):
+        load_dotenv()
+
         if self.client is None:
             self.client = OpenAI(
-                base_url="",
-                api_key=""
+                base_url=os.getenv("base_url"),
+                api_key=os.getenv("api_key")
             )
         else:
             return self.client
