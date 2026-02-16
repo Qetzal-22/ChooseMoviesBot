@@ -54,6 +54,7 @@ async def create_markup_Genres(user_id, doneType):
     builder.adjust(2)
     return builder.as_markup()
 
+# command start
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     btns = [
