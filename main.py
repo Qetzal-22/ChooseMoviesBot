@@ -270,6 +270,8 @@ async def cmd_back(message: types.Message):
 
 @dp.message(F.text.lower()=="подобрать фильм")
 async def cmd_filmtest(message: types.Message, state: FSMContext):
+    await db_storySearch.clear_storyData(message.from_user.id)
+
     chat_id = message.chat.id
     await bot.send_message(
         chat_id=chat_id,
