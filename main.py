@@ -1,4 +1,4 @@
-from datetime import datetime
+# -*- coding: utf-8 -*-
 
 from aiogram import F, Bot, Dispatcher, types
 from aiogram.filters import Command
@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 import os
 
 import asyncio
+
 import DataBaseUsers
 import DataBaseStorySearch
 import Requests_AI
@@ -367,10 +368,26 @@ async def choosing_film(chat_id, user_id, data: tuple):
     print("age: ", age)
     print("favoriteGenres: ", favoriteGenres)
 
-    nameFilms = story_data[0]["lookingFilm"]
-    response = await ai.requests(age, favoriteGenres, data, looking=nameFilms)
+    if story_data == []:
+        nameFilms = ""
+    else:
+        nameFilms = story_data[0]["lookingFilm"]
 
-    nameFilms += " " + (await ai.get_filmName(response))
+    print(nameFilms)
+    # Request AI
+    response = await ai.requests(age, favoriteGenres, data, looking=nameFilms)
+#     response = """
+#     1. **Малышка на драйве** (2017) – Стильный и остроумный триллер с отличным саундтреком. Героиня, случайно ставшая свидетельницей преступления, вынуждена вести машину на пределе возможностей, а её диалоги с подружкой-алкоголичкой — отдельное удовольствие. Динамично, дерзко и смешно.
+#
+# 2. **Кровавый праздник** (2016) – Ироничный и жесткий хоррор-слэшер. Группа друзей на съёмной вилле сталкивается с маньяком, но фильм настолько перегружен гротескным юмором и абсурдными ситуациями, что смех часто перевешивает ужас. Ярко, нелепо, запоминающе.
+#
+# 3. **Что мы творим в тени** (2014) – Чёрная комедия в стиле Тарантино, действие происходит в одной квартире. Два неудачливого грабителя пытаются пережить безумную ночь, полную нелепых случайностей, диалогов и нарастающего хаоса. Динамично, по-свойски смешно, с элементами триллера."""
+
+    # request AI
+    response_nameFilms = await ai.get_filmName(response)
+    # response_nameFilms = "Малышка на драйве, Кровавый праздник, Что мы творим в тени"
+
+    nameFilms += " " + (response_nameFilms)
     await db_storySearch.update_storyData(user_id, mood, company, time, nameFilms)
 
     btns = [
