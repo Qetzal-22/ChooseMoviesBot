@@ -85,6 +85,23 @@ class DataBaseStorySearch:
         finally:
             await conn.close()
 
+    async def clear_storyData(self, user_id):
+        conn = await self.connect()
+        try:
+            clear_query = """
+            UPDATE storySearch
+            SET mood = '',
+                company = '',
+                time = '',
+                lookingFilm = ''
+            WHERE tg_id = ?
+            """
+            async with conn.cursor() as cursor:
+                await cursor.execute(clear_query, (user_id,))
+                await conn.commit()
+        finally:
+            await conn.close()
+
 
 
 
