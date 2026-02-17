@@ -376,6 +376,9 @@ async def choosing_film(chat_id, user_id, data: tuple):
     print(nameFilms)
     # Request AI
     response = await ai.requests(age, favoriteGenres, data, looking=nameFilms)
+    content, response_nameFilms = response.split("***")
+    print(content)
+    print(response_nameFilms)
 #     response = """
 #     1. **Малышка на драйве** (2017) – Стильный и остроумный триллер с отличным саундтреком. Героиня, случайно ставшая свидетельницей преступления, вынуждена вести машину на пределе возможностей, а её диалоги с подружкой-алкоголичкой — отдельное удовольствие. Динамично, дерзко и смешно.
 #
@@ -384,7 +387,7 @@ async def choosing_film(chat_id, user_id, data: tuple):
 # 3. **Что мы творим в тени** (2014) – Чёрная комедия в стиле Тарантино, действие происходит в одной квартире. Два неудачливого грабителя пытаются пережить безумную ночь, полную нелепых случайностей, диалогов и нарастающего хаоса. Динамично, по-свойски смешно, с элементами триллера."""
 
     # request AI
-    response_nameFilms = await ai.get_filmName(response)
+    # response_nameFilms = await ai.get_filmName(response)
     # response_nameFilms = "Малышка на драйве, Кровавый праздник, Что мы творим в тени"
 
     nameFilms += " " + (response_nameFilms)
@@ -396,7 +399,7 @@ async def choosing_film(chat_id, user_id, data: tuple):
     kb = InlineKeyboardMarkup(inline_keyboard=btns)
     await bot.send_message(
         chat_id=chat_id,
-        text=response,
+        text=content,
         reply_markup=kb
     )
 
