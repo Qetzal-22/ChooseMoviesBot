@@ -16,6 +16,7 @@ import asyncio
 import DataBaseUsers
 import DataBaseStorySearch
 import Requests_AI
+from keyboards import register_kb
 
 load_dotenv()
 
@@ -58,18 +59,15 @@ async def create_markup_Genres(user_id, doneType):
 # command start
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    btns = [
-        [InlineKeyboardButton(text="Регистрация", callback_data="register_user")]
-    ]
-    kb = InlineKeyboardMarkup(inline_keyboard=btns)
+    kb = await register_kb()
     await message.answer("Зарегистрируйся чтоб начать подбор фильмов!", reply_markup=kb)
 
 # developing command
 @dp.message(Command("help"))
 async def cmd_help(message: types.Message):
     await message.answer("<b>All commands:</b>\n"
-                         "1) <code>/start</code> - Start Bot\n"
-                         "2) <code>/help</code> - View Command Bot\n\n"
+                         "1) /start - Start Bot\n"
+                         "2) /help - View Command Bot\n\n"
                          "<b>Text command:</b>\n"
                          "1) профиль\n"
                          "2) изменить любимые жанры\n"
@@ -234,6 +232,17 @@ async def get_genresChanged(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.message(F.text.lower()=="профиль")
 async def cmd_profil(message: types.Message):
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+    if not await db_users.verify_user(user_id):
+        kb = await register_kb()
+        await bot.send_message(
+            chat_id=chat_id,
+            text="Вы не зарегистрированны",
+            reply_markup=kb
+        )
+        return
+
     text = "<b>Ваш профиль:</b>\n\n"
     users_data = await db_users.get_data()
     for user in users_data:
@@ -258,6 +267,16 @@ async def cmd_profil(message: types.Message):
 @dp.message(F.text.lower()=="посмотреть любимые жанры")
 async def cmd_showGenres(message: types.Message):
     user_id = message.from_user.id
+    chat_id = message.chat.id
+    if not await db_users.verify_user(user_id):
+        kb = await register_kb()
+        await bot.send_message(
+            chat_id=chat_id,
+            text="Вы не зарегистрированны",
+            reply_markup=kb
+        )
+        return
+
     text = "Ваши любимые жанры:"
     data = await db_users.get_data_id(user_id)
     genres = data[0]["favoriteGenres"].split()
@@ -274,11 +293,32 @@ async def cmd_showGenres(message: types.Message):
 @dp.message(F.text.lower()=="изменить любимые жанры")
 async def cmd_steGenres(message: types.Message):
     user_id = message.from_user.id
+    chat_id = message.chat.id
+    if not await db_users.verify_user(user_id):
+        kb = await register_kb()
+        await bot.send_message(
+            chat_id=chat_id,
+            text="Вы не зарегистрированны",
+            reply_markup=kb
+        )
+        return
+
     kb = await create_markup_Genres(user_id, "changed")
     await message.answer(text="Выберете ваши любимые жанры: ", reply_markup=kb)
 
 @dp.message(F.text.lower()=="назад на главную")
 async def cmd_back(message: types.Message):
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+    if not await db_users.verify_user(user_id):
+        kb = await register_kb()
+        await bot.send_message(
+            chat_id=chat_id,
+            text="Вы не зарегистрированны",
+            reply_markup=kb
+        )
+        return
+
     text = f"Вы вернулись на главную"
     builder = ReplyKeyboardBuilder()
     builder.button(text="Профиль")
@@ -289,9 +329,19 @@ async def cmd_back(message: types.Message):
 
 @dp.message(F.text.lower()=="подобрать фильм")
 async def cmd_filmtest(message: types.Message, state: FSMContext):
+    user_id = message.from_user.id
+    chat_id = message.chat.id
+    if not await db_users.verify_user(user_id):
+        kb = await register_kb()
+        await bot.send_message(
+            chat_id=chat_id,
+            text="Вы не зарегистрированны",
+            reply_markup=kb
+        )
+        return
+
     await db_storySearch.clear_storyData(message.from_user.id)
 
-    chat_id = message.chat.id
     await bot.send_message(
         chat_id=chat_id,
         text="Для того чтобы выбрать вам идеальный фильм пройди мини-тест:"
