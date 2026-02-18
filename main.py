@@ -2,7 +2,7 @@
 
 from aiogram import F, Bot, Dispatcher, types
 from aiogram.filters import Command
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, BotCommand
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
@@ -67,11 +67,16 @@ async def cmd_start(message: types.Message):
 # developing command
 @dp.message(Command("help"))
 async def cmd_help(message: types.Message):
-    await message.answer("All commands:\n"
-                         "1) /start - Start Bot\n"
-                         "2) /help - View Command Bot\n"
-                         "Text command:\n"
-                         "1) профиль - Enter to profile\n")
+    await message.answer("<b>All commands:</b>\n"
+                         "1) <code>/start</code> - Start Bot\n"
+                         "2) <code>/help</code> - View Command Bot\n\n"
+                         "<b>Text command:</b>\n"
+                         "1) профиль\n"
+                         "2) изменить любимые жанры\n"
+                         "3) посмотреть любимые жанры\n"
+                         "4) назад на главную\n"
+                         "5) подобрать фильм",
+                         parse_mode="HTML")
 
 @dp.callback_query(F.data.startswith("register_user"))
 async def cmd_register(callback: types.CallbackQuery, state: FSMContext):
@@ -229,13 +234,26 @@ async def get_genresChanged(callback: types.CallbackQuery, state: FSMContext):
 
 @dp.message(F.text.lower()=="профиль")
 async def cmd_profil(message: types.Message):
+    text = "<b>Ваш профиль:</b>\n\n"
+    users_data = await db_users.get_data()
+    for user in users_data:
+        if user["tg_id"] == message.from_user.id:
+            user_data = user
+            break
+
+    text += f"Логин: {user_data['login']}\n"
+    text += f"Возрост: {user_data['age']}\n"
+    text += f"Любимые жанры:\n"
+    for genre in user_data["favoriteGenres"].split():
+        text += f"    * {genre}\n"
+
+
     builder = ReplyKeyboardBuilder()
-    builder.button(text="Посмотреть любимые жанры")
     builder.button(text="Изменить любимые жанры")
     builder.button(text="Назад на главную")
-    builder.adjust(2)
+    builder.adjust(1)
     kb = builder.as_markup(resize_keyboard=True)
-    await message.answer(text="Ваш профиль:", reply_markup=kb)
+    await message.answer(text=text, reply_markup=kb, parse_mode="HTML")
 
 @dp.message(F.text.lower()=="посмотреть любимые жанры")
 async def cmd_showGenres(message: types.Message):
@@ -280,10 +298,10 @@ async def cmd_filmtest(message: types.Message, state: FSMContext):
     )
 
     content = ("1)🎭 Напиши свое настроение. Например: \n"
-               "\t«хочу дождь и осень», \n"
-               "\t«хочу смеяться», \n"
-               "\t«хочу напряжения/адреналин», \n"
-               "\t«плакать/чувственно»")
+               "\t«хочу лето», \n"
+               "\t«посмеятся», \n"
+               "\t«хочу адреналина», \n"
+               "\t«поплакать»")
     await bot.send_message(
         chat_id=chat_id,
         text=content
@@ -375,16 +393,21 @@ async def choosing_film(chat_id, user_id, data: tuple):
 
     print(nameFilms)
     # Request AI
-    response = await ai.requests(age, favoriteGenres, data, looking=nameFilms)
+    # response = await ai.requests(age, favoriteGenres, data, looking=nameFilms)
+    response = """
+        1. **Экстази** (2011) — Трогательная драма о молодой женщине, которая сталкивается с потерей и ищет смысл жизни. Фильм полон эмоциональных моментов, которые заставят вас плакать и задуматься.  
+    2. **Всё везде и сразу** (2022) — Фантастическая комедия-драма с глубоким смыслом о семье, любви и самопознании. Сочетает юмор и трогательные сцены.  
+    3. **Миллионер из трущоб** (2008) — История о мальчике из бедных кварталов, который участвует в телевикторине. Фильм полон драмы и надежды.  
+    4. **В погоне за счастьем** (2006) — Биографическая драма о борьбе отца за счастье своего сына. Эмоциональный и вдохновляющий фильм.  
+    5. **Вечное сияние чистого разума** (2004) — Фантастическая мелодрама о любви и памяти. Глубокий и трогательный сюжет.  
+
+    ***  
+    Экстази; Всё везде и сразу; Миллионер из трущоб; В погоне за счастьем; Вечное сияние чистого разума
+        """
     content, response_nameFilms = response.split("***")
     print(content)
     print(response_nameFilms)
-#     response = """
-#     1. **Малышка на драйве** (2017) – Стильный и остроумный триллер с отличным саундтреком. Героиня, случайно ставшая свидетельницей преступления, вынуждена вести машину на пределе возможностей, а её диалоги с подружкой-алкоголичкой — отдельное удовольствие. Динамично, дерзко и смешно.
-#
-# 2. **Кровавый праздник** (2016) – Ироничный и жесткий хоррор-слэшер. Группа друзей на съёмной вилле сталкивается с маньяком, но фильм настолько перегружен гротескным юмором и абсурдными ситуациями, что смех часто перевешивает ужас. Ярко, нелепо, запоминающе.
-#
-# 3. **Что мы творим в тени** (2014) – Чёрная комедия в стиле Тарантино, действие происходит в одной квартире. Два неудачливого грабителя пытаются пережить безумную ночь, полную нелепых случайностей, диалогов и нарастающего хаоса. Динамично, по-свойски смешно, с элементами триллера."""
+
 
     # request AI
     # response_nameFilms = await ai.get_filmName(response)
@@ -430,7 +453,15 @@ async def cmd_seeMore(callback: types.CallbackQuery, state: FSMContext):
     )
     await choosing_film(chat_id, user_id, (mood, company, time))
 
+async def set_my_command(bot: Bot):
+    command = [
+        BotCommand(command="/start", description="Запуск бота"),
+        BotCommand(command="/help", description="Вывод команд")
+    ]
+    await bot.set_my_commands(command)
+
 async def main():
+    await set_my_command(bot)
     await db_users.create_db()
     await db_storySearch.create_db()
     await dp.start_polling(bot)
