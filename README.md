@@ -11,5 +11,5 @@ OR_TOKEN = "YOUR TOKRN OPEN ROUTER"
 ```
 
 ## Command
-`/start` - Запуск бота
+`/start` - Запуск бота  
 `/help` - Показывает доступные команды
